@@ -1,0 +1,24 @@
+version: 0.2
+
+env:
+  variables:
+    ARTIFACT_BUCKET: build-artifacts
+    ARTIFACT_PREFIX: build-artifacts
+    APP_DIR: app
+
+phases:
+  install:
+    runtime-versions:
+      python: 3.11
+    commands:
+      - pip install -r $APP_DIR/requirements.txt
+      - pip install pytest
+  build:
+    commands:
+      - pytest $APP_DIR
+      - scripts/package_app.sh "$APP_DIR" "$ARTIFACT_BUCKET" "$ARTIFACT_PREFIX"
+
+artifacts:
+  files:
+    - build_metadata.json
+  discard-paths: yes

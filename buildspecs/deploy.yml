@@ -1,0 +1,27 @@
+version: 0.2
+
+env:
+  variables:
+    ARTIFACT_BUCKET: build-artifacts
+    ARTIFACT_PREFIX: build-artifacts
+    SSM_PARAM_NAME: /app/current_version
+    ASG_NAME: placeholder-asg
+    TARGET_GROUP_ARN: placeholder-target-group-arn
+    ALB_DNS: placeholder-alb-dns
+
+phases:
+  install:
+    runtime-versions:
+      python: 3.11
+    commands:
+      - pip install awscli
+      - yum install -y jq
+  build:
+    commands:
+      - VERSION=$(cat build_metadata.json | jq -r '.version')
+      - scripts/deploy_artifact.sh "$VERSION" "$ARTIFACT_BUCKET" "$ARTIFACT_PREFIX" "$SSM_PARAM_NAME" "$ASG_NAME" "$TARGET_GROUP_ARN" "$ALB_DNS"
+
+artifacts:
+  files:
+    - deploy_metadata.json
+  discard-paths: yes
